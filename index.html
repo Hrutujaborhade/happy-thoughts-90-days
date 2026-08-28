@@ -93,7 +93,7 @@ function load(d){
  document.getElementById("daytitle").textContent="DAY "+d+" — "+focus[d-1][0];
  let w=Math.ceil(d/7), theme=d<=30?"Awareness | जागरूकता":d<=60?"Love | प्रेम":"Integrity | अखंडता";
  document.getElementById("week").textContent="WEEK "+w+" • "+theme;
- document.getElementById("question").textContent=focus[d-1][1]; document.getElementById("weekly").value=localStorage.getItem("ht_week_"+Math.ceil(d/7))||"";
+ document.getElementById("question").textContent=focus[d-1][1];
  renderDays(); updateProgress();
 }
 function save(){
@@ -112,9 +112,36 @@ function next(){saveSilent();load(Math.min(90,day+1))}
 function saveSilent(){fields.forEach(f=>{let el=document.getElementById(f);localStorage.setItem(key(day,f),el.type==="checkbox"?(el.checked?"1":"0"):el.value)})}
 function today(){let saved=Number(localStorage.getItem("ht_current_day")||0);load(saved||day)}
 function saveWeek(){let w=Math.ceil(day/7);localStorage.setItem("ht_week_"+w,document.getElementById("weekly").value);alert("Weekly reflection saved 🌱")}
-function exportData(){let obj={};for(let i=1;i<=90;i++){obj[i]={};fields.forEach(f=>obj[i][f]=localStorage.getItem(key(i,f))||"")}for(let i=1;i<=13;i++)obj["week_"+i]=localStorage.getItem("ht_week_"+i)||"";let blob=new Blob([JSON.stringify(obj,null,2)],{type:"application/json"});let a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="happy-thoughts-90-day-backup.json";a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)}
-function excelCell(v){return "<td>"+String(v??"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/\n/g,"<br>")+"</td>"}
-function exportExcel(){let headers=["Day","Date","Meditation","Surya Namaskar","Pranayam","Reading","Sadhana","09:09 Prayer","Kshama","Healing","Today's Focus / Practice","Observe","Reaction","Learning","Gratitude","Awareness / 10"];let rows=[];rows.push("<tr>"+headers.map(h=>"<th>"+h+"</th>").join("")+"</tr>");for(let i=1;i<=90;i++){let vals=[i,localStorage.getItem(key(i,"date"))||"",localStorage.getItem(key(i,"med"))==="1"?"Yes":"",localStorage.getItem(key(i,"surya"))==="1"?"Yes":"",localStorage.getItem(key(i,"pran"))==="1"?"Yes":"",localStorage.getItem(key(i,"read"))==="1"?"Yes":"",localStorage.getItem(key(i,"sadhana"))==="1"?"Yes":"",localStorage.getItem(key(i,"prayer"))==="1"?"Yes":"",localStorage.getItem(key(i,"kshama"))==="1"?"Yes":"",localStorage.getItem(key(i,"healing"))==="1"?"Yes":"",localStorage.getItem(key(i,"practice"))||"",localStorage.getItem(key(i,"observe"))||"",localStorage.getItem(key(i,"reaction"))||"",localStorage.getItem(key(i,"learning"))||"",localStorage.getItem(key(i,"gratitude"))||"",localStorage.getItem(key(i,"score"))||""];rows.push("<tr>"+vals.map(excelCell).join("")+"</tr>")}let weekly="<tr><th colspan="16">Weekly Reflections</th></tr>";weekly+="<tr><th>Week</th><th colspan="15">Reflection</th></tr>";for(let w=1;w<=13;w++)weekly+="<tr>"+excelCell(w)+excelCell(localStorage.getItem("ht_week_"+w)||"")+"<td colspan="14"></td></tr>";let doc='<!doctype html><html><head><meta charset="UTF-8"><style>table{border-collapse:collapse;font-family:Arial}th,td{border:1px solid #999;padding:6px;vertical-align:top}th{font-weight:bold}td{white-space:pre-wrap}</style></head><body><h2>My 90 Days — Happy Thoughts</h2><table>'+rows.join("")+'</table><br><table>'+weekly+'</table></body></html>';let blob=new Blob(["\ufeff",doc],{type:"application/vnd.ms-excel"});let a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="happy-thoughts-90-day-progress.xls";a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)}
+function exportData(){let obj={};for(let i=1;i<=90;i++){obj[i]={};fields.forEach(f=>obj[i][f]=localStorage.getItem(key(i,f))||"")}for(let i=1;i<=13;i++)obj["week_"+i]=localStorage.getItem("ht_week_"+i)||"";let blob=new Blob([JSON.stringify(obj,null,2)],{type:"application/json"});let a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="happy-thoughts-90-day-backup.json";a.click()}
+function exportExcel(){
+ let headers=["Day","Date","Meditation","Surya Namaskar","Pranayam","Reading","Sadhana","09:09 Prayer","Kshama","Healing","Today's Focus / Practice","Observe","Reaction","Learning","Gratitude","Awareness / 10"];
+ function esc(v){return String(v==null?"":v).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/\n/g,"<br>")}
+ let rows=['<tr>'+headers.map(h=>'<th>'+esc(h)+'</th>').join('')+'</tr>'];
+ for(let i=1;i<=90;i++){
+  let vals=[i,localStorage.getItem(key(i,"date"))||"",
+   localStorage.getItem(key(i,"med"))==="1"?"Yes":"",
+   localStorage.getItem(key(i,"surya"))==="1"?"Yes":"",
+   localStorage.getItem(key(i,"pran"))==="1"?"Yes":"",
+   localStorage.getItem(key(i,"read"))==="1"?"Yes":"",
+   localStorage.getItem(key(i,"sadhana"))==="1"?"Yes":"",
+   localStorage.getItem(key(i,"prayer"))==="1"?"Yes":"",
+   localStorage.getItem(key(i,"kshama"))==="1"?"Yes":"",
+   localStorage.getItem(key(i,"healing"))==="1"?"Yes":"",
+   localStorage.getItem(key(i,"practice"))||"",
+   localStorage.getItem(key(i,"observe"))||"",
+   localStorage.getItem(key(i,"reaction"))||"",
+   localStorage.getItem(key(i,"learning"))||"",
+   localStorage.getItem(key(i,"gratitude"))||"",
+   localStorage.getItem(key(i,"score"))||""];
+  rows.push('<tr>'+vals.map(esc).map(v=>'<td>'+v+'</td>').join('')+'</tr>');
+ }
+ let weekly=['<tr><th>Week</th><th>Weekly Reflection</th></tr>'];
+ for(let w=1;w<=13;w++) weekly.push('<tr><td>'+w+'</td><td>'+esc(localStorage.getItem("ht_week_"+w)||"")+'</td></tr>');
+ let html='<!doctype html><html><head><meta charset="UTF-8"><style>table{border-collapse:collapse;font-family:Arial}th,td{border:1px solid #999;padding:6px;vertical-align:top}th{font-weight:bold}td{white-space:pre-wrap}</style></head><body><h2>My 90 Days — Happy Thoughts</h2><table>'+rows.join('')+'</table><br><table>'+weekly.join('')+'</table></body></html>';
+ let blob=new Blob(["\ufeff",html],{type:"application/vnd.ms-excel"});
+ let a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="happy-thoughts-90-day-progress.xls";a.click();
+ setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+}
 function importData(){let input=document.createElement("input");input.type="file";input.accept=".json";input.onchange=()=>{let r=new FileReader();r.onload=()=>{try{let o=JSON.parse(r.result);Object.keys(o).forEach(k=>{if(k.startsWith("week_"))localStorage.setItem("ht_"+k,o[k]);else if(o[k]&&typeof o[k]==="object")Object.keys(o[k]).forEach(f=>localStorage.setItem(key(k,f),o[k][f]))});load(day);alert("Backup restored 🌸")}catch(e){alert("Invalid backup file")}};r.readAsText(input.files[0])};input.click()}
 function clearAll(){if(confirm("सारा saved data delete करना है?")){for(let i=1;i<=90;i++)fields.forEach(f=>localStorage.removeItem(key(i,f)));for(let i=1;i<=13;i++)localStorage.removeItem("ht_week_"+i);load(1)}}
 load(day);
